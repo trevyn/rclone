@@ -9,6 +9,7 @@ import (
 	"encoding/base32"
 	"fmt"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -727,14 +728,17 @@ func (c *Cipher) newDecrypterSeek(ctx context.Context, open OpenRangeSeek, offse
 	setLimit := false
 	// Open initially with no seek
 	if offset == 0 && limit < 0 {
+		log.Println("If no offset or limit then open whole file")
 		// If no offset or limit then open whole file
 		rc, err = open(ctx, 0, -1)
 	} else if offset == 0 {
+		log.Println("If no offset open the header + limit worth of the file")
 		// If no offset open the header + limit worth of the file
 		_, underlyingLimit, _, _ := calculateUnderlying(offset, limit)
 		rc, err = open(ctx, 0, int64(fileHeaderSize)+underlyingLimit)
 		setLimit = true
 	} else {
+		log.Println("Otherwise just read the header to start with")
 		// Otherwise just read the header to start with
 		rc, err = open(ctx, 0, int64(fileHeaderSize))
 		doRangeSeek = true

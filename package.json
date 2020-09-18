@@ -1,0 +1,6 @@
+{
+ "scripts": {
+  "build-turbo": "./build-turbo.sh",
+  "build-turbo-with-clean": "go1.15.2 clean -cache -testcache && ./build-turbo.sh"
+ }
+}

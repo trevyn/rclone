@@ -211,22 +211,10 @@ func makeConfigPath() string {
 	return hiddenConfigFileName
 }
 
-// LoadConfig loads the config file
-func LoadConfig() {
-	// Set RCLONE_CONFIG_DIR for backend config and subprocesses
-	_ = os.Setenv("RCLONE_CONFIG_DIR", filepath.Dir(ConfigPath))
-
-	// Load configuration file.
-	var err error
-	configFile, err = loadConfigFile()
-	if err == errorConfigFileNotFound {
-		fs.Logf(nil, "Config file %q not found - using defaults", ConfigPath)
-		configFile, _ = goconfig.LoadFromReader(&bytes.Buffer{})
-	} else if err != nil {
-		log.Fatalf("Failed to load config file %q: %v", ConfigPath, err)
-	} else {
-		fs.Debugf(nil, "Using config file from %q", ConfigPath)
-	}
+// SetConfigFromString loads the config file
+func SetConfigFromString(cfg string) {
+	// var err error
+	configFile, _ = goconfig.LoadFromData([]byte(cfg))
 
 	// Start the token bucket limiter
 	accounting.StartTokenBucket()
@@ -236,6 +224,11 @@ func LoadConfig() {
 
 	// Start the transactions per second limiter
 	fshttp.StartHTTPTokenBucket()
+}
+
+// LoadConfig loads the config file
+func LoadConfig() {
+	// We only allow setting config from string
 }
 
 var errorConfigFileNotFound = errors.New("config file not found")

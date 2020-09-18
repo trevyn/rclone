@@ -961,6 +961,8 @@ func configTeamDrive(ctx context.Context, opt *Options, m configmap.Mapper, name
 
 // getClient makes an http client according to the options
 func getClient(opt *Options) *http.Client {
+	log.Println("in getClient ", opt)
+
 	t := fshttp.NewTransportCustom(fs.Config, func(t *http.Transport) {
 		if opt.DisableHTTP2 {
 			t.TLSNextProto = map[string]func(string, *tls.Conn) http.RoundTripper{}
@@ -972,6 +974,8 @@ func getClient(opt *Options) *http.Client {
 }
 
 func getServiceAccountClient(opt *Options, credentialsData []byte) (*http.Client, error) {
+	log.Println("in getServiceAccountClient ", opt)
+
 	scopes := driveScopes(opt.Scope)
 	conf, err := google.JWTConfigFromJSON(credentialsData, scopes...)
 	if err != nil {
@@ -987,6 +991,8 @@ func getServiceAccountClient(opt *Options, credentialsData []byte) (*http.Client
 func createOAuthClient(opt *Options, name string, m configmap.Mapper) (*http.Client, error) {
 	var oAuthClient *http.Client
 	var err error
+
+	log.Println("in createOAuthClient ", opt)
 
 	// try loading service account credentials from env variable, then from a file
 	if len(opt.ServiceAccountCredentials) == 0 && opt.ServiceAccountFile != "" {
@@ -3278,6 +3284,9 @@ func (o *baseObject) httpResponse(ctx context.Context, url, method string, optio
 	}
 	req = req.WithContext(ctx) // go1.13 can use NewRequestWithContext
 	fs.OpenOptionAddHTTPHeaders(req.Header, options)
+	log.Println("req header: ", req.Header)
+	// log.Println("client: ", o.fs.client)
+
 	if o.bytes == 0 {
 		// Don't supply range requests for 0 length objects as they always fail
 		delete(req.Header, "Range")
@@ -3348,6 +3357,8 @@ func isGoogleError(err error, what string) bool {
 
 // open a url for reading
 func (o *baseObject) open(ctx context.Context, url string, options ...fs.OpenOption) (in io.ReadCloser, err error) {
+	log.Println("in open ", url, options)
+
 	_, res, err := o.httpResponse(ctx, url, "GET", options)
 	if err != nil {
 		if isGoogleError(err, "cannotDownloadAbusiveFile") {
