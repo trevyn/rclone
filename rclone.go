@@ -136,6 +136,10 @@ func GoFetchFiledata(path *C.char, startbytepos int64, endbytepos int64) {
 	b := make([]byte, numbytes)
 
 	_, err = io.ReadFull(in, b[:])
+	if err != nil {
+		log.Println(err, "failed to ReadFull")
+		return
+	}
 
 	type Filecache struct {
 		Cachekey     string
