@@ -15,7 +15,15 @@ GOEXE="go1.15.2"
 # MACOSFLAGS="-isysroot $(xcodebuild -version -sdk macosx10.15 Path) -mmacosx-version-min=10.14.6 -arch x86_64"
 
 # x86_64-apple-darwin
+if [ "$(uname)" == "Darwin" ]; then
 GODEBUG=cgocheck=2 GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 ${GOEXE} build -buildmode=c-archive -o build/librclone-x86_64-apple-darwin.a
+fi
+
+# x86_64-unknown-linux-gnu
+if [ "$(uname)" == "Linux" ]; then
+go version
+GODEBUG=cgocheck=2 GOOS=linux GOARCH=amd64 CGO_ENABLED=1 ${GOEXE} build -buildmode=c-archive -o build/librclone-x86_64-unknown-linux-gnu.a
+fi
 
 # x86_64-apple-ios
 # GODEBUG=cgocheck=2 GOOS=darwin GOARCH=amd64 CC=${CLANGPATH} CXX=${CLANGXXPATH} CGO_CFLAGS=${SIMULATORFLAGS} CGO_CXXFLAGS=${SIMULATORFLAGS} CGO_LDFLAGS=${SIMULATORFLAGS} CGO_ENABLED=1 ${GOEXE} build -tags ios -buildmode=c-archive -o build/rclone-x86_64-apple-ios.a

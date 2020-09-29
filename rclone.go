@@ -19,6 +19,7 @@ import (
 // https://github.com/golang/go/issues/25832#issuecomment-571631784
 
 // #cgo darwin LDFLAGS: -Wl,-undefined,dynamic_lookup
+// #cgo linux LDFLAGS: -Wl,-unresolved-symbols=ignore-all
 // #include "rclone.h"
 import "C"
 
