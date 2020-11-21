@@ -6,7 +6,7 @@ set -ex
 
 rm -f build/*
 
-GOEXE="go1.15.2"
+GOEXE="go1.15.5"
 
 # CLANGPATH="$(xcodebuild -find-executable clang)"
 # CLANGXXPATH="$(xcodebuild -find-executable clang++)"
