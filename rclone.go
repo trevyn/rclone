@@ -137,10 +137,10 @@ func GoFetchFiledata(path *C.char, startbytepos int64, endbytepos int64) {
 	}
 
 	var totalBytesRead int64 = 0
+	b := make([]byte, 65536) // seems like there is an internal 64k buffer somewhere; increasing this still only returns 64k chunks
 
 	for {
 		log.Println("calling Read")
-		b := make([]byte, 65536)
 
 		numBytesRead, readErr := in.Read(b[:])
 
@@ -157,7 +157,6 @@ func GoFetchFiledata(path *C.char, startbytepos int64, endbytepos int64) {
 				log.Println(err, "failed to marshal list object")
 				return
 			}
-			log.Println("out is: ", string(out))
 
 			C.rust_insert_filecache_from_go(C.CString(string(out)), (*C.uchar)(C.CBytes(b[:])), C.longlong(numBytesRead))
 		}
