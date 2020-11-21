@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"log"
 
 	"github.com/pkg/errors"
@@ -131,31 +130,41 @@ func GoFetchFiledata(path *C.char, startbytepos int64, endbytepos int64) {
 		return
 	}
 
-	log.Println("calling ReadFull")
-
-	var numbytes = (endbytepos - startbytepos) + 1
-	b := make([]byte, numbytes)
-
-	_, err = io.ReadFull(in, b[:])
-	if err != nil {
-		log.Println(err, "failed to ReadFull")
-		return
-	}
-
 	type Filecache struct {
 		Cachekey     string
 		Startbytepos int64
 		Endbytepos   int64
 	}
 
-	item := Filecache{Cachekey: C.GoString(path), Startbytepos: startbytepos, Endbytepos: endbytepos}
+	var totalBytesRead int64 = 0
 
-	out, err := json.Marshal(item)
-	if err != nil {
-		log.Println(err, "failed to marshal list object")
-		return
+	for {
+		log.Println("calling Read")
+		b := make([]byte, 65536)
+
+		numBytesRead, readErr := in.Read(b[:])
+
+		log.Println("got bytes from Read -> ", numBytesRead)
+
+		if numBytesRead > 0 {
+
+			item := Filecache{Cachekey: C.GoString(path), Startbytepos: totalBytesRead, Endbytepos: totalBytesRead + int64(numBytesRead) - 1}
+
+			totalBytesRead += int64(numBytesRead)
+
+			out, err := json.Marshal(item)
+			if err != nil {
+				log.Println(err, "failed to marshal list object")
+				return
+			}
+			log.Println("out is: ", string(out))
+
+			C.rust_insert_filecache_from_go(C.CString(string(out)), (*C.uchar)(C.CBytes(b[:])), C.longlong(numBytesRead))
+		}
+
+		if readErr != nil {
+			log.Println(err, "err from Read")
+			return
+		}
 	}
-	log.Println("out is: ", string(out))
-
-	C.rust_insert_filecache_from_go(C.CString(string(out)), (*C.uchar)(C.CBytes(b[:])), C.longlong(numbytes))
 }
